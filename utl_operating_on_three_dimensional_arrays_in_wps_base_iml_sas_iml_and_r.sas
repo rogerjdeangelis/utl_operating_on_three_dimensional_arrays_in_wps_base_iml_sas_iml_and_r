@@ -1,5 +1,12 @@
 Operating on three dimensional arrays in wps base iml sas iml and R
 
+See a better solution by Rick
+for dealing with higer order matricies in SAS/IML on
+the end of this post.
+
+Rick Wicklin
+rick.wicklin@sas.com
+
 github
 https://tinyurl.com/yb5pcstl
 https://github.com/rogerjdeangelis/utl_operating_on_three_dimensional_arrays_in_wps_base_iml_sas_iml_and_r
@@ -128,4 +135,66 @@ endsubmit;
 *import r=         data=;
 run;quit;
 ');
+
+*____  _      _
+|  _ \(_) ___| | __
+| |_) | |/ __| |/ /
+|  _ <| | (__|   <
+|_| \_\_|\___|_|\_\
+
+;
+
+
+Rick Wicklin
+rick.wicklin@sas.com
+
+There are several old ways of dealing with multivariate arrays in SAS/IML,
+but the 14.2 release of SAS/IML introduced "lists," which you can think of as
+a dynamic array of other objects. The recent 14.3 release (SAS 9.4M4, Nov 2017)
+introduced syntax for the natural manipulation of lists. The following example in
+SAS/IML 14.3 packs three matrices into a list and then uses a DO loop
+ to iterate through the arrays and perform the elementwise multiplication in your example:
+
+proc iml;
+val1={
+  1 5 ,
+  3 7  };
+val2={
+  2 6,
+  4 8 };
+val3={
+  -1 2,
+  1 -3};
+
+L = [val1, val2, val3];  /* create list (array) of matrices */
+result = j(2,2,1);  /* base case is {1 1, 1 1} */
+do i = 1 to ListLen(L);
+   result = result # L$i;
+end;
+print result;
+
+/* compare with manual computation */
+check = val1 # val2 # val3;
+print check;
+
+I presented papers on lists at the last two SAS Global Forums.
+
+Some resources, for those who are interested in learning more:
+Getting Started example from Doc chapter on Lists and in-memory Tables:
+(Basically the same as Roger's example)
+http://go.documentation.sas.com/?docsetId=imlug&docsetVersion=14.3&docsetTarget=imlug_lists_gettingstarted02.htm&locale=en
+
+First blog post: https://blogs.sas.com/content/iml/2017/03/29/lists-sasiml.html
+Natural syntax: https://blogs.sas.com/content/iml/2018/01/22/iml-lists-syntax.html
+Named lists and passing lists to functions:
+https://blogs.sas.com/content/iml/2018/01/24/pass-lists-to-sas-iml-functions.html
+
+Anyone who is interested in statistical programming, statistical
+graphics, matrix computations, and SAS/IML is invited to read or subscribe to my blog:
+https://blogs.sas.com/content/iml/
+Some of my topics are similar to the "how to do [cool thing] in Python or R"
+topics that Roger posts, except I use SAS.
+
+
+
 
